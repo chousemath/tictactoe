@@ -26,6 +26,16 @@ class ViewController: UIViewController {
     ]
     var selected: [Move] = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
     var locked = false
+    var hasWon: Bool {
+        get {
+            for combination in combinations {
+                if checkForWin(firstIndex: combination.first, secondIndex: combination.second, thirdIndex: combination.third) {
+                    return true
+                }
+            }
+            return false
+        }
+    }
     @IBOutlet var buttonCollection: [UIButton]!
     @IBOutlet weak var winLabel: UILabel!
     @IBAction func handleRestart(_ sender: UIButton) {
@@ -45,12 +55,9 @@ class ViewController: UIViewController {
             selected[buttonNumber] = Move.Player
             print("is Move.Player: \(selected[buttonNumber])")
             print(selected)
-            for combination in combinations {
-                if checkForWin(firstIndex: combination.first, secondIndex: combination.second, thirdIndex: combination.third) {
-                    print("You win! \(combination.first), \(combination.second), \(combination.third)")
-                    winLabel.text = "You win!"
-                    return
-                }
+            if hasWon {
+                winLabel.text = "You win!"
+                return
             }
             
             var unselected: [Int] = []
