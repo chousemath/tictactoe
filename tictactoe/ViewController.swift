@@ -9,18 +9,47 @@
 import UIKit
 
 class ViewController: UIViewController {
-
-    var selected: [Bool] = [false, false, false, false, false, false, false, false, false]
+    enum Move {
+        case Blank
+        case Player
+        case Enemy
+    }
+    var combinations = [
+        (first: 0, second: 1, third: 2),
+        (first: 0, second: 3, third: 6),
+        (first: 0, second: 4, third: 8),
+        (first: 1, second: 4, third: 7),
+        (first: 2, second: 4, third: 6),
+        (first: 2, second: 5, third: 8),
+        (first: 3, second: 4, third: 5),
+        (first: 6, second: 7, third: 8)
+    ]
+    var selected: [Move] = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
     var locked = false
     @IBOutlet var buttonCollection: [UIButton]!
+    @IBAction func handleRestart(_ sender: UIButton) {
+        selected = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
+        for button in buttonCollection {
+            button.setTitle("", for: UIControlState.normal)
+            button.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+        }
+    }
     @IBAction func handleClick(_ sender: UIButton) {
         if !locked, let buttonNumber = buttonCollection.index(of: sender) {
             buttonCollection[buttonNumber].setTitle("X", for: UIControlState.normal)
             buttonCollection[buttonNumber].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
-            selected[buttonNumber] = true
+            selected[buttonNumber] = Move.Player
+            
+            for combination in combinations {
+                if checkForWin(firstIndex: combination.first, secondIndex: combination.second, thirdIndex: combination.third) {
+                    print("You win! \(combination.first), \(combination.second), \(combination.third)")
+                    return
+                }
+            }
+            
             var unselected: [Int] = []
             for index in selected.indices {
-                if !selected[index] { unselected.append(index) }
+                if selected[index] == Move.Blank { unselected.append(index) }
             }
             if unselected.count == 0 { return }
             locked = true
@@ -28,10 +57,14 @@ class ViewController: UIViewController {
                 let randomIndex = unselected[Int(arc4random_uniform(UInt32(unselected.count)))]
                 self.buttonCollection[randomIndex].setTitle("O", for: UIControlState.normal)
                 self.buttonCollection[randomIndex].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
-                self.selected[randomIndex] = true
+                self.selected[randomIndex] = Move.Enemy
                 self.locked = false
             }
         }
+    }
+    
+    func checkForWin(firstIndex first: Int, secondIndex second: Int, thirdIndex third: Int) -> Bool {
+        return selected[first] == Move.Player && selected[second] == Move.Player && selected[third] == Move.Player
     }
     
     override func viewDidLoad() {
