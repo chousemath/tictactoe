@@ -27,7 +27,9 @@ class ViewController: UIViewController {
     var selected: [Move] = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
     var locked = false
     @IBOutlet var buttonCollection: [UIButton]!
+    @IBOutlet weak var winLabel: UILabel!
     @IBAction func handleRestart(_ sender: UIButton) {
+        winLabel.text = ""
         selected = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
         for button in buttonCollection {
             button.setTitle("", for: UIControlState.normal)
@@ -36,13 +38,17 @@ class ViewController: UIViewController {
     }
     @IBAction func handleClick(_ sender: UIButton) {
         if !locked, let buttonNumber = buttonCollection.index(of: sender) {
+            if (selected[buttonNumber] != Move.Blank) { return }
             buttonCollection[buttonNumber].setTitle("X", for: UIControlState.normal)
             buttonCollection[buttonNumber].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
+            print("buttonNumber: \(buttonNumber)")
             selected[buttonNumber] = Move.Player
-            
+            print("is Move.Player: \(selected[buttonNumber])")
+            print(selected)
             for combination in combinations {
                 if checkForWin(firstIndex: combination.first, secondIndex: combination.second, thirdIndex: combination.third) {
                     print("You win! \(combination.first), \(combination.second), \(combination.third)")
+                    winLabel.text = "You win!"
                     return
                 }
             }
@@ -51,7 +57,10 @@ class ViewController: UIViewController {
             for index in selected.indices {
                 if selected[index] == Move.Blank { unselected.append(index) }
             }
-            if unselected.count == 0 { return }
+            if unselected.count == 0 {
+                winLabel.text = "You lose :("
+                return
+            }
             locked = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 let randomIndex = unselected[Int(arc4random_uniform(UInt32(unselected.count)))]
