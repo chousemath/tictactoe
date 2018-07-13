@@ -14,7 +14,7 @@ class ViewController: UIViewController {
         case Player
         case Enemy
     }
-    var combinations = [
+    private(set) var combinations = [
         (first: 0, second: 1, third: 2),
         (first: 0, second: 3, third: 6),
         (first: 0, second: 4, third: 8),
@@ -24,8 +24,8 @@ class ViewController: UIViewController {
         (first: 3, second: 4, third: 5),
         (first: 6, second: 7, third: 8)
     ]
-    var selected: [Move] = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
-    var locked = false
+    private(set) var selected: [Move] = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
+    private(set) var locked = false
     var hasWon: Bool {
         get {
             for combination in combinations {
@@ -36,9 +36,9 @@ class ViewController: UIViewController {
             return false
         }
     }
-    @IBOutlet var buttonCollection: [UIButton]!
-    @IBOutlet weak var winLabel: UILabel!
-    @IBAction func handleRestart(_ sender: UIButton) {
+    @IBOutlet private var buttonCollection: [UIButton]!
+    @IBOutlet private weak var winLabel: UILabel!
+    @IBAction private func handleRestart(_ sender: UIButton) {
         winLabel.text = ""
         selected = [Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank, Move.Blank]
         for button in buttonCollection {
@@ -46,7 +46,7 @@ class ViewController: UIViewController {
             button.backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
         }
     }
-    @IBAction func handleClick(_ sender: UIButton) {
+    @IBAction private func handleClick(_ sender: UIButton) {
         if !locked, let buttonNumber = buttonCollection.index(of: sender) {
             if (selected[buttonNumber] != Move.Blank) { return }
             buttonCollection[buttonNumber].setTitle("X", for: UIControlState.normal)
@@ -70,7 +70,7 @@ class ViewController: UIViewController {
             }
             locked = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                let randomIndex = unselected[Int(arc4random_uniform(UInt32(unselected.count)))]
+                let randomIndex = unselected[unselected.count.random]
                 self.buttonCollection[randomIndex].setTitle("O", for: UIControlState.normal)
                 self.buttonCollection[randomIndex].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
                 self.selected[randomIndex] = Move.Enemy
@@ -79,7 +79,8 @@ class ViewController: UIViewController {
         }
     }
     
-    func checkForWin(firstIndex first: Int, secondIndex second: Int, thirdIndex third: Int) -> Bool {
+    private func checkForWin(firstIndex first: Int, secondIndex second: Int, thirdIndex third: Int) -> Bool {
+        assert(selected.indices.contains(first) && selected.indices.contains(second) && selected.indices.contains(third), "ViewController.checkForWin(firstIndex: \(first), secondIndex: \(second), thirdIndex: \(third)), one or more of these indices is out of bounds")
         return selected[first] == Move.Player && selected[second] == Move.Player && selected[third] == Move.Player
     }
     
@@ -94,5 +95,11 @@ class ViewController: UIViewController {
     }
 
 
+}
+
+extension Int {
+    var random: Int {
+        return Int(arc4random_uniform(UInt32(self)))
+    }
 }
 
